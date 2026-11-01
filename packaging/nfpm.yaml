@@ -1,0 +1,52 @@
+# One config, four native formats: nfpm pkg -p deb|rpm|archlinux|apk
+name: mwp-fm
+arch: all
+platform: linux
+version: ${VERSION}
+version_schema: none
+release: "1"
+section: sound
+priority: optional
+maintainer: My Weird Prompts <hello@myweirdprompts.com>
+description: |
+  MWP FM, the My Weird Prompts streaming app, as a desktop application. Opens
+  stream.myweirdprompts.com in a standalone Chromium app window with its own
+  launcher, icon and taskbar entry.
+vendor: My Weird Prompts
+homepage: https://github.com/My-Weird-Prompts/MWP-FM-Linux
+license: Apache-2.0
+contents:
+  - src: ./packaging/mwp-fm
+    dst: /usr/bin/mwp-fm
+    file_info: { mode: 0755 }
+  - src: ./packaging/mwp-fm.desktop
+    dst: /usr/share/applications/mwp-fm.desktop
+  - src: ./README.md
+    dst: /usr/share/doc/mwp-fm/README.md
+  - src: ./packaging/icons/mwp-fm-48.png
+    dst: /usr/share/icons/hicolor/48x48/apps/mwp-fm.png
+  - src: ./packaging/icons/mwp-fm-64.png
+    dst: /usr/share/icons/hicolor/64x64/apps/mwp-fm.png
+  - src: ./packaging/icons/mwp-fm-128.png
+    dst: /usr/share/icons/hicolor/128x128/apps/mwp-fm.png
+  - src: ./packaging/icons/mwp-fm-256.png
+    dst: /usr/share/icons/hicolor/256x256/apps/mwp-fm.png
+  - src: ./packaging/icons/mwp-fm-512.png
+    dst: /usr/share/icons/hicolor/512x512/apps/mwp-fm.png
+scripts:
+  postinstall: ./packaging/postinstall.sh
+  postremove: ./packaging/postinstall.sh
+overrides:
+  deb:
+    recommends:
+      - chromium | chromium-browser | google-chrome-stable | brave-browser | microsoft-edge-stable
+      - xdg-utils
+  rpm:
+    recommends:
+      - chromium
+  archlinux:
+    suggests:
+      - chromium
+  apk:
+    recommends:
+      - chromium

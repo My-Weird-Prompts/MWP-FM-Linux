@@ -1,0 +1,26 @@
+[Desktop Entry]
+Type=Application
+Version=1.5
+Name=MWP FM
+GenericName=Podcast Player
+Comment=Stream and browse My Weird Prompts
+Exec=mwp-fm
+Icon=mwp-fm
+Terminal=false
+Categories=AudioVideo;Audio;Player;
+Keywords=podcast;radio;My Weird Prompts;MWP;
+StartupWMClass=MWP-FM
+StartupNotify=true
+Actions=radio;latest;search;
+
+[Desktop Action radio]
+Name=Play Radio
+Exec=mwp-fm radio
+
+[Desktop Action latest]
+Name=Latest Episode
+Exec=mwp-fm latest
+
+[Desktop Action search]
+Name=Search
+Exec=mwp-fm search

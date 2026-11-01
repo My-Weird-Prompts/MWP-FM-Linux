@@ -1,0 +1,54 @@
+#!/bin/sh
+# MWP FM desktop launcher: opens https://stream.myweirdprompts.com as a standalone app
+# window, the Linux equivalent of the Android TWA (MWP-FM-Android). No web code is
+# bundled, so every web deploy reaches desktop users with no package update.
+#
+# Usage: mwp-fm [radio|latest|search|PATH]
+#   MWP_FM_BROWSER=/path/to/chromium mwp-fm   # force a browser
+set -eu
+
+BASE="https://stream.myweirdprompts.com"
+case "${1:-}" in
+  "")      URL="$BASE/" ;;
+  radio)   URL="$BASE/?autoplay=1" ;;
+  latest)  URL="$BASE/?latest=1" ;;
+  search)  URL="$BASE/#/search" ;;
+  /*)      URL="$BASE$1" ;;
+  http*)   URL="$1" ;;
+  *)       echo "usage: mwp-fm [radio|latest|search|/path]" >&2; exit 2 ;;
+esac
+
+PROFILE="${XDG_DATA_HOME:-$HOME/.local/share}/mwp-fm/profile"
+# A dedicated profile keeps the app's window class (taskbar icon), downloads and
+# history separate from the user's normal browser.
+CHROMIUM_FLAGS="--app=$URL --class=MWP-FM --name=MWP-FM --user-data-dir=$PROFILE --no-first-run --no-default-browser-check"
+
+run_native() { mkdir -p "$PROFILE"; exec "$1" $CHROMIUM_FLAGS; }
+
+if [ -n "${MWP_FM_BROWSER:-}" ]; then
+  run_native "$MWP_FM_BROWSER"
+fi
+
+for b in chromium chromium-browser google-chrome-stable google-chrome brave-browser brave \
+         microsoft-edge-stable microsoft-edge vivaldi-stable vivaldi; do
+  if command -v "$b" >/dev/null 2>&1; then run_native "$b"; fi
+done
+
+# Flatpak browsers: their sandbox cannot use a profile under ~/.local/share, so they
+# get the app window without the dedicated profile.
+if command -v flatpak >/dev/null 2>&1; then
+  for id in org.chromium.Chromium com.google.Chrome com.brave.Browser com.microsoft.Edge io.github.ungoogled_software.ungoogled_chromium; do
+    if flatpak info "$id" >/dev/null 2>&1; then
+      exec flatpak run "$id" --app="$URL" --class=MWP-FM --no-first-run
+    fi
+  done
+fi
+
+# Firefox has no app mode; a new window is the closest it gets.
+for b in firefox firefox-esr librewolf; do
+  if command -v "$b" >/dev/null 2>&1; then exec "$b" --new-window "$URL"; fi
+done
+
+if command -v xdg-open >/dev/null 2>&1; then exec xdg-open "$URL"; fi
+echo "mwp-fm: no browser found. Install Chromium (best) or open $URL" >&2
+exit 1
